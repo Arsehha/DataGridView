@@ -1,12 +1,10 @@
 ﻿namespace DataGridView.Classes
 {
+    /// <summary>
+    /// Перечисление возможных форм обучение
+    /// </summary>
     public enum EducationType : byte
     {
-        /// <summary>
-        /// Не выбрано
-        /// </summary>
-        None = 0,
-
         /// <summary>
         /// Очная
         /// </summary>

@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
+using System.Windows.Forms;
 using DataGridView.Classes;
 using DataGridView.Infrastructure;
 using DataGridView.Models;
@@ -8,7 +10,7 @@ namespace DataGridView.Forms
     public partial class AddApplicantForm : Form
     {
         private readonly ApplicantModel targetApplicant;
-        private readonly ErrorProvider errorProvider = new ErrorProvider();
+        private readonly ErrorProvider errorProvider = new();
 
         public AddApplicantForm(ApplicantModel? sourceApplicant = null)
         {
@@ -17,18 +19,14 @@ namespace DataGridView.Forms
             if (sourceApplicant != null)
             {
                 targetApplicant = sourceApplicant.Clone();
-                buttonSave.Text = "Сохранить";
                 Text = "Редактирование абитуриента";
-
-                numericUpDownMathScore.Value = targetApplicant.MathScore;
-                numericUpDownRussianScore.Value = targetApplicant.RussianScore;
-                numericUpDownInformaticsScore.Value = targetApplicant.InformaticsScore;
+                buttonSave.Text = "Сохранить";
             }
             else
             {
                 targetApplicant = new ApplicantModel();
-                buttonSave.Text = "Добавить";
                 Text = "Добавить абитуриента";
+                buttonSave.Text = "Добавить";
             }
 
             errorProvider.BlinkStyle = ErrorBlinkStyle.NeverBlink;
@@ -41,48 +39,15 @@ namespace DataGridView.Forms
             comboBoxSex.AddBinding(x => x.SelectedItem!, targetApplicant, x => x.Sex, errorProvider);
             dateTimePickerDateOfBirth.AddBinding(x => x.Value, targetApplicant, x => x.DateOfBirth, errorProvider);
             comboBoxEducationForm.AddBinding(x => x.SelectedItem!, targetApplicant, x => x.EducationForm, errorProvider);
-
+            numericUpDownMathScore.AddBinding(x => x.Value, targetApplicant, x => x.MathScore, errorProvider);
+            numericUpDownRussianScore.AddBinding(x => x.Value, targetApplicant, x => x.RussianScore, errorProvider);
+            numericUpDownInformaticsScore.AddBinding(x => x.Value, targetApplicant, x => x.InformaticsScore, errorProvider);
         }
 
-        /// <summary>
-        /// Текущий абитуриент
-        /// </summary>
         public ApplicantModel CurrentApplicant => targetApplicant;
 
-        /// <summary>
-        /// Обработчик нажатия кнопки "Сохранить" или "Добавить"
-        /// </summary>
         private void buttonSave_Click(object sender, EventArgs e)
         {
-            targetApplicant.MathScore = (int)numericUpDownMathScore.Value;
-            targetApplicant.RussianScore = (int)numericUpDownRussianScore.Value;
-            targetApplicant.InformaticsScore = (int)numericUpDownInformaticsScore.Value;
-
-            errorProvider.Clear();
-
-            bool hasErrors = false;
-
-            if (targetApplicant.Sex == SexType.None)
-            {
-                errorProvider.SetError(comboBoxSex, "Пол обязателен для заполнения");
-                hasErrors = true;
-            }
-
-            if (targetApplicant.EducationForm == EducationType.None)
-            {
-                errorProvider.SetError(comboBoxEducationForm, "Форма обучения обязательна для заполнения");
-                hasErrors = true;
-            }
-
-            if (hasErrors)
-            {
-                MessageBox.Show("Пожалуйста, заполните все обязательные поля.",
-                    "Обязательные поля",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
-                return;
-            }
-
             var context = new ValidationContext(targetApplicant);
             var results = new List<ValidationResult>();
             bool isValid = Validator.TryValidateObject(targetApplicant, context, results, true);
@@ -94,30 +59,7 @@ namespace DataGridView.Forms
             }
             else
             {
-                foreach (var validationResult in results)
-                {
-                    foreach (var memberName in validationResult.MemberNames)
-                    {
-                        Control? control = memberName switch
-                        {
-                            nameof(ApplicantModel.FullName) => textBoxFullName,
-                            nameof(ApplicantModel.Sex) => comboBoxSex,
-                            nameof(ApplicantModel.DateOfBirth) => dateTimePickerDateOfBirth,
-                            nameof(ApplicantModel.EducationForm) => comboBoxEducationForm,
-                            nameof(ApplicantModel.MathScore) => numericUpDownMathScore,
-                            nameof(ApplicantModel.RussianScore) => numericUpDownRussianScore,
-                            nameof(ApplicantModel.InformaticsScore) => numericUpDownInformaticsScore,
-                            _ => null
-                        };
-
-                        if (control != null)
-                        {
-                            errorProvider.SetError(control, validationResult.ErrorMessage);
-                        }
-                    }
-                }
-
-                MessageBox.Show("Пожалуйста, исправьте ошибки в форме перед сохранением.",
+                MessageBox.Show("Пожалуйста, исправьте ошибки в форме.",
                     "Ошибки валидации",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Warning);

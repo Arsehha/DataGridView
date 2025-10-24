@@ -1,12 +1,10 @@
 ﻿namespace DataGridView.Classes
 {
+    /// <summary>
+    /// Перечисление полов
+    /// </summary>
     public enum SexType : byte
     {
-        /// <summary>
-        /// Не выбрано
-        /// </summary>
-        None = 0,
-
         /// <summary>
         /// Мужчина
         /// </summary>

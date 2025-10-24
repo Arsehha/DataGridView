@@ -7,6 +7,9 @@ using DataGridView.Models;
 
 namespace DataGridView.Forms
 {
+    /// <summary>
+    /// Форма с информацией об абитуриентах
+    /// </summary>
     public partial class MainForm : Form
     {
         private readonly List<ApplicantModel> applicants;
