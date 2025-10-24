@@ -69,6 +69,7 @@ namespace DataGridView.Forms
             TotalScore.DataPropertyName = nameof(ApplicantModel.TotalScore);
 
             dataGridView.AutoGenerateColumns = false;
+            dataGridView.AllowUserToAddRows = false;
 
             bindingSource.DataSource = applicants;
             dataGridView.DataSource = bindingSource;
