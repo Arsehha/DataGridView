@@ -5,6 +5,9 @@ using DataGridView.Models;
 
 namespace DataGridView.Forms
 {
+    /// <summary>
+    /// Форма добавления или изменения данных абитуриентов
+    /// </summary>
     public partial class AddApplicantForm : Form
     {
         private readonly ApplicantModel targetApplicant;
