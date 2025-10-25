@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Windows.Forms;
-using DataGridView.Classes;
+﻿using DataGridView.Enums;
 using DataGridView.Models;
 
 namespace DataGridView.Forms

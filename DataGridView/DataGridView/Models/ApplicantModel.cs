@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using DataGridView.Classes;
+using DataGridView.Enums;
 
 namespace DataGridView.Models
 {

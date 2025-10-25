@@ -1,7 +1,5 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
-using System.Windows.Forms;
-using DataGridView.Classes;
+﻿using System.ComponentModel.DataAnnotations;
+using DataGridView.Enums;
 using DataGridView.Infrastructure;
 using DataGridView.Models;
 
