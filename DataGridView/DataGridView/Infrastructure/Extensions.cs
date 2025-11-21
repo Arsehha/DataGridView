@@ -1,115 +1,107 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
+using System.Reflection;
 
-namespace DataGridView.Infrastructure
+namespace DataGridViewProject.Infrastructure
 {
     /// <summary>
-    /// Класс расширений для работы с привязкой данных и валидацией в Windows Forms
+    /// Статический класс методов расширения
     /// </summary>
     public static class Extensions
     {
         /// <summary>
-        /// Создает двухстороннюю привязку данных между свойством элемента управления и свойством модели данных
+        /// Добавить Binding
         /// </summary>
-        public static void AddBinding<TControl, TSource, TProperty>(
-            this TControl control,
-            Expression<Func<TControl, TProperty>> controlProperty,
-            TSource source,
-            Expression<Func<TSource, TProperty>> sourceProperty,
+        public static void AddBinding<TControl, TSource>(
+            this TControl control, // тип элемента управления
+            Expression<Func<TControl, object>> destinationProperty, // свойство контрола, которое будет связано
+            TSource source, // тип модели данных
+            Expression<Func<TSource, object>> sourceProperty, // свойство модели, которое будет связано
             ErrorProvider? errorProvider = null)
             where TControl : Control
             where TSource : class
         {
-            var controlPropName = GetPropertyName(controlProperty);
+            var destPropName = GetPropertyName(destinationProperty);
             var sourcePropName = GetPropertyName(sourceProperty);
 
-            // Удаляем существующую привязку, если есть
-            var existing = control.DataBindings[controlPropName];
+            var existing = control.DataBindings[destPropName];
             if (existing != null)
             {
                 control.DataBindings.Remove(existing);
             }
 
-            // Создаём новую привязку
-            var binding = new Binding(controlPropName, source, sourcePropName, true)
+            var binding = new Binding(destPropName, source, sourcePropName)
             {
                 DataSourceUpdateMode = DataSourceUpdateMode.OnPropertyChanged
             };
 
             control.DataBindings.Add(binding);
 
-            // Подключаем валидацию, если указан ErrorProvider
             if (errorProvider != null)
             {
-                AddValidation(control, source, sourcePropName, errorProvider);
+                var sourcePropertyInfo = source.GetType().GetProperty(sourcePropName);
+                var validationAttributes = sourcePropertyInfo?.GetCustomAttributes<ValidationAttribute>();
+
+                if (validationAttributes?.Any() == true)
+                {
+                    control.Validating += (sender, e) =>
+                    {
+                        var context = new ValidationContext(source) { MemberName = sourcePropName };
+                        var results = new List<ValidationResult>();
+
+                        errorProvider.SetError(control, string.Empty);
+
+                        var propertyValue = sourcePropertyInfo?.GetValue(source);
+                        var isValid = Validator.TryValidateProperty(propertyValue, context, results);
+
+                        if (!isValid)
+                        {
+                            var erorrs = results.Where(r =>
+                                r.MemberNames.Contains(sourcePropName) ||
+                                !r.MemberNames.Any()
+                            );
+                            foreach (var error in erorrs)
+                            {
+                                errorProvider.SetError(control, error.ErrorMessage);
+                            }
+                        }
+                    };
+                }
             }
         }
 
         /// <summary>
-        /// Добавление валидации к контролу
+        /// Вернуть отображаемое имя Enum
         /// </summary>
-        private static void AddValidation<TControl, TSource>(
-            TControl control,
-            TSource source,
-            string sourcePropertyName,
-            ErrorProvider errorProvider)
-            where TControl : Control
-            where TSource : class
+        public static string GetDisplayName(this Enum value)
         {
-            var sourcePropertyInfo = source.GetType().GetProperty(sourcePropertyName);
-            if (sourcePropertyInfo == null)
+            var member = value.GetType().GetMember(value.ToString()).FirstOrDefault();
+            if (member != null)
             {
-                return;
+                var attr = member.GetCustomAttribute<DisplayAttribute>();
+                if (attr != null)
+                {
+                    return attr.Name;
+                }
             }
-
-            control.Validating += (sender, e) =>
-            {
-                ValidateControl(control, source, sourcePropertyName, errorProvider);
-            };
+            return value.ToString();
         }
 
-        /// <summary>
-        /// Валидация конкретного контрола
-        /// </summary>
-        private static void ValidateControl<TControl, TSource>(
-            TControl control,
-            TSource source,
-            string sourcePropertyName,
-            ErrorProvider errorProvider)
-            where TControl : Control
-            where TSource : class
+        private static string GetPropertyName<TType>(Expression<Func<TType, object>> expression)
         {
-            var sourcePropertyInfo = source.GetType().GetProperty(sourcePropertyName);
-            if (sourcePropertyInfo == null)
+            Expression body = expression.Body;
+            if (body.NodeType == ExpressionType.Convert)
             {
-                return;
+                body = ((UnaryExpression)body).Operand;
             }
 
-            var context = new ValidationContext(source) { MemberName = sourcePropertyName };
-            var results = new List<ValidationResult>();
-
-            var propertyValue = sourcePropertyInfo.GetValue(source);
-            bool isValid = Validator.TryValidateProperty(propertyValue, context, results);
-
-            errorProvider.SetError(control, isValid ? string.Empty : results.FirstOrDefault()?.ErrorMessage ?? string.Empty);
-        }
-
-        /// <summary>
-        /// Извлекает имя свойства из лямбда-выражения
-        /// </summary>
-        private static string GetPropertyName<T, TProperty>(Expression<Func<T, TProperty>> expression)
-        {
-            if (expression.Body is MemberExpression memberExpression)
+            if (body is MemberExpression memberExpression)
             {
                 return memberExpression.Member.Name;
             }
 
-            if (expression.Body is UnaryExpression unaryExpression && unaryExpression.Operand is MemberExpression operand)
-            {
-                return operand.Member.Name;
-            }
-
-            throw new ArgumentException("Expression must be a property access.", nameof(expression));
+            throw new ArgumentException("Выражение должно быть доступом к свойству", nameof(expression));
         }
+
     }
 }

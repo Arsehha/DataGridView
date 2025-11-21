@@ -1,75 +1,95 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using DataGridView.Enums;
-using DataGridView.Infrastructure;
-using DataGridView.Models;
+using System.Windows.Forms;
+using DataGridView.Entities;
+using DataGridView.Entities.Enums;
+using DataGridView.Services;
+using DataGridViewProject.Infrastructure;
 
 namespace DataGridView.Forms
 {
     /// <summary>
-    /// Форма добавления или изменения данных абитуриентов
+    /// Форма редактирования студентов
     /// </summary>
     public partial class AddApplicantForm : Form
     {
-        private readonly ApplicantModel targetApplicant;
-        private readonly ErrorProvider errorProvider = new();
+        /// <summary>
+        /// Текущий студент
+        /// </summary>
+        public ApplicantModel Applicant;
 
-        public AddApplicantForm(ApplicantModel? sourceApplicant = null)
+        /// <summary>
+        /// Инициализировать новый экземпляр
+        /// </summary>
+        public AddApplicantForm(ApplicantModel student)
         {
             InitializeComponent();
-
-            if (sourceApplicant != null)
-            {
-                targetApplicant = sourceApplicant.Clone();
-                Text = "Редактирование абитуриента";
-                buttonSave.Text = "Сохранить";
-            }
-            else
-            {
-                targetApplicant = new ApplicantModel();
-                Text = "Добавить абитуриента";
-                buttonSave.Text = "Добавить";
-            }
-
-            errorProvider.BlinkStyle = ErrorBlinkStyle.NeverBlink;
-            errorProvider.ContainerControl = this;
-
-            comboBoxSex.DataSource = Enum.GetValues(typeof(SexType));
-            comboBoxEducationForm.DataSource = Enum.GetValues(typeof(EducationType));
-
-            textBoxFullName.AddBinding(x => x.Text, targetApplicant, x => x.FullName, errorProvider);
-            comboBoxSex.AddBinding(x => x.SelectedItem!, targetApplicant, x => x.Sex, errorProvider);
-            dateTimePickerDateOfBirth.AddBinding(x => x.Value, targetApplicant, x => x.DateOfBirth, errorProvider);
-            comboBoxEducationForm.AddBinding(x => x.SelectedItem!, targetApplicant, x => x.EducationForm, errorProvider);
-            numericUpDownMathScore.AddBinding(x => x.Value, targetApplicant, x => x.MathScore, errorProvider);
-            numericUpDownRussianScore.AddBinding(x => x.Value, targetApplicant, x => x.RussianScore, errorProvider);
-            numericUpDownInformaticsScore.AddBinding(x => x.Value, targetApplicant, x => x.InformaticsScore, errorProvider);
+            Applicant = student;
+            InitBindings();
         }
 
-        public ApplicantModel CurrentApplicant => targetApplicant;
+        private void InitBindings()
+        {
+            comboBoxEducationForm.DataSource = Enum.GetValues(typeof(EducationType))
+                .Cast<EducationType>()
+                .Select(g => new { Value = g, Name = g.GetDisplayName() })
+                .ToArray();
+            comboBoxEducationForm.DisplayMember = "Name";
+            comboBoxEducationForm.ValueMember = "Value";
+
+            comboBoxSex.DataSource = Enum.GetValues(typeof(SexType))
+                .Cast<SexType>()
+                .Select(g => new { Value = g, Name = g.GetDisplayName() })
+                .ToArray();
+            comboBoxSex.DisplayMember = "Name";
+            comboBoxSex.ValueMember = "Value";
+
+            textBoxFullName.AddBinding(x => x.Text, Applicant, x => x.FullName, errorProvider);
+            comboBoxSex.AddBinding(x => x.Text, Applicant, x => x.Sex, errorProvider);
+            comboBoxEducationForm.AddBinding(x => x.Text, Applicant, x => x.EducationForm, errorProvider);
+            dateTimePickerDateOfBirth.AddBinding(x => x.Text, Applicant, x => x.DateOfBirth, errorProvider);
+            numericUpDownMathScore.AddBinding(x => x.Value, Applicant, x => x.MathScore, errorProvider);
+            numericUpDownRussianScore.AddBinding(x => x.Value, Applicant, x => x.RussianScore, errorProvider);
+            numericUpDownInformaticsScore.AddBinding(x => x.Value, Applicant, x => x.InformaticsScore, errorProvider);
+        }
 
         private void buttonSave_Click(object sender, EventArgs e)
         {
-            var context = new ValidationContext(targetApplicant);
+            errorProvider.Clear();
+            Applicant.DateOfBirth = Applicant.DateOfBirth.Date;
+
+            var context = new ValidationContext(Applicant);
             var results = new List<ValidationResult>();
-            bool isValid = Validator.TryValidateObject(targetApplicant, context, results, true);
 
-            if (isValid)
+            var valid = Validator.TryValidateObject(Applicant, context, results, true);
+            if (!valid)
             {
-                DialogResult = DialogResult.OK;
-                Close();
-            }
-            else
-            {
-                MessageBox.Show("Пожалуйста, исправьте ошибки в форме.",
-                    "Ошибки валидации",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
-            }
-        }
+                foreach (var validationResult in results)
+                {
+                    foreach (var memberName in validationResult.MemberNames)
+                    {
+                        Control? control = memberName switch
+                        {
+                            nameof(Applicant.FullName) => textBoxFullName,
+                            nameof(Applicant.Sex) => comboBoxSex,
+                            nameof(Applicant.DateOfBirth) => dateTimePickerDateOfBirth,
+                            nameof(Applicant.EducationForm) => comboBoxEducationForm,
+                            nameof(Applicant.MathScore) => numericUpDownMathScore,
+                            nameof(Applicant.RussianScore) => numericUpDownRussianScore,
+                            nameof(Applicant.InformaticsScore) => numericUpDownInformaticsScore,
+                            _ => null
+                        };
 
-        private void buttonCancel_Click(object sender, EventArgs e)
-        {
-            Close();
+                        if (control != null)
+                        {
+                            errorProvider.SetError(control, validationResult.ErrorMessage);
+                        }
+                    }
+                }
+
+                return;
+            }
+
+            DialogResult = DialogResult.OK;
         }
     }
 }

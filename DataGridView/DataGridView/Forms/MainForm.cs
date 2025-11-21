@@ -1,5 +1,7 @@
-﻿using DataGridView.Enums;
-using DataGridView.Models;
+﻿
+using DataGridView.Entities;
+using DataGridView.Services;
+using DataGridViewProject.Infrastructure;
 
 namespace DataGridView.Forms
 {
@@ -8,56 +10,33 @@ namespace DataGridView.Forms
     /// </summary>
     public partial class MainForm : Form
     {
-        private readonly List<ApplicantModel> applicants;
+        private readonly ApplicantService applicantService;
         private readonly BindingSource bindingSource = new();
 
         /// <summary>
         /// Конструктор по умолчанию
         /// </summary>
-        public MainForm()
+        public MainForm(ApplicantService applicantService)
         {
+            this.applicantService = applicantService;
             InitializeComponent();
+            dataGridView.AutoGenerateColumns = false;
+            UpdateBindingSources();
 
-            applicants = new List<ApplicantModel>();
+            ConfigureColumns();
+            _ = RefreshStats();
+        }
 
-            applicants.Add(new ApplicantModel
-            {
-                Id = Guid.NewGuid(),
-                FullName = "Иванов Иван Иванович",
-                Sex = SexType.Male,
-                DateOfBirth = new DateTime(2005, 3, 15),
-                EducationForm = EducationType.FullTime,
-                MathScore = 85,
-                RussianScore = 90,
-                InformaticsScore = 95
-            });
+        private async Task UpdateBindingSources()
+        {
+            var applicants = await applicantService.GetAll(CancellationToken.None);
+            bindingSource.DataSource = applicants.ToList();
+            dataGridView.DataSource = bindingSource;
+            await RefreshStats();
+        }
 
-            applicants.Add(new ApplicantModel
-            {
-                Id = Guid.NewGuid(),
-                FullName = "Петрова Анна Сергеевна",
-                Sex = SexType.Female,
-                DateOfBirth = new DateTime(2004, 7, 22),
-                EducationForm = EducationType.PartTime,
-                MathScore = 78,
-                RussianScore = 88,
-                InformaticsScore = 82
-            });
-
-            applicants.Add(new ApplicantModel
-            {
-                Id = Guid.NewGuid(),
-                FullName = "Сидоров Дмитрий Алексеевич",
-                Sex = SexType.Male,
-                DateOfBirth = new DateTime(2005, 1, 10),
-                EducationForm = EducationType.PartTime,
-                MathScore = 92,
-                RussianScore = 95,
-                InformaticsScore = 98
-            });
-
-            SetStatistic();
-
+        private void ConfigureColumns()
+        {
             FullName.DataPropertyName = nameof(ApplicantModel.FullName);
             Sex.DataPropertyName = nameof(ApplicantModel.Sex);
             DateOfBirth.DataPropertyName = nameof(ApplicantModel.DateOfBirth);
@@ -65,158 +44,76 @@ namespace DataGridView.Forms
             MathScore.DataPropertyName = nameof(ApplicantModel.MathScore);
             RussianScore.DataPropertyName = nameof(ApplicantModel.RussianScore);
             InformaticsScore.DataPropertyName = nameof(ApplicantModel.InformaticsScore);
-            TotalScore.DataPropertyName = nameof(ApplicantModel.TotalScore);
-
-            dataGridView.AutoGenerateColumns = false;
-            dataGridView.AllowUserToAddRows = false;
-
-            bindingSource.DataSource = applicants;
-            dataGridView.DataSource = bindingSource;
         }
 
-        /// <summary>
-        /// Форматирование данных в ячейке
-        /// </summary>
+        private async Task RefreshStats()
+        {
+            toolStripStatusLabelCount.Text = $"Всего студентов: {await applicantService.GetCountStudents(CancellationToken.None)}";
+            toolStripStatusLabelHighScores.Text = $"Всего студентов с более 150 баллов: {await applicantService.GetStudentsByMinScore(Constants.MinTotalScore, CancellationToken.None)}";
+        }
+
+        private async void toolStripButtonAdd_Click(object sender, EventArgs e)
+        {
+            var form = new AddApplicantForm(new ApplicantModel());
+            if (form.ShowDialog() == DialogResult.OK)
+            {
+                await applicantService.Add(form.Applicant, CancellationToken.None);
+                await UpdateBindingSources();
+            }
+        }
+
+        private async void toolStripButtonEdit_Click(object sender, EventArgs e)
+        {
+            if (bindingSource.Current is not ApplicantModel selected)
+            {
+                return;
+            }
+
+            var clone = new ApplicantModel
+            {
+                Id = selected.Id,
+                FullName = selected.FullName,
+                Sex = selected.Sex,
+                DateOfBirth = selected.DateOfBirth,
+                EducationForm = selected.EducationForm,
+                MathScore = selected.MathScore,
+                RussianScore = selected.RussianScore,
+                InformaticsScore = selected.InformaticsScore
+            };
+
+            var form = new AddApplicantForm(clone);
+            if (form.ShowDialog() == DialogResult.OK)
+            {
+                await applicantService.Update(form.Applicant, CancellationToken.None);
+                await UpdateBindingSources();
+            }
+        }
+
         private void dataGridView_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
-            var col = dataGridView.Columns[e.ColumnIndex];
-            var applicant = (ApplicantModel)dataGridView.Rows[e.RowIndex].DataBoundItem;
+            if (e.Value is Enum enumVal)
+            {
+                e.Value = enumVal.GetDisplayName();
+            }
 
-            if (applicant == null)
+            if (dataGridView.Columns[e.ColumnIndex].Name == "TotalScores"
+                && dataGridView.Rows[e.RowIndex].DataBoundItem is ApplicantModel student)
+            {
+                e.Value = student.MathScore + student.RussianScore + student.InformaticsScore;
+            }
+        }
+
+        private async void toolStripButtonDelete_Click(object sender, EventArgs e)
+        {
+            if (bindingSource.Current is not ApplicantModel selected)
             {
                 return;
             }
-
-            if (col.DataPropertyName == nameof(ApplicantModel.Sex))
+            if (MessageBox.Show("Удалить запись?", "Подтверждение", MessageBoxButtons.YesNo) == DialogResult.Yes)
             {
-                e.Value = applicant.Sex switch
-                {
-                    SexType.Male => "Мужской",
-                    SexType.Female => "Женский",
-                    _ => "Не указан"
-                };
-                e.FormattingApplied = true;
+                await applicantService.Remove(selected.Id, CancellationToken.None);
+                await UpdateBindingSources();
             }
-            else if (col.DataPropertyName == nameof(ApplicantModel.EducationForm))
-            {
-                e.Value = applicant.EducationForm switch
-                {
-                    EducationType.FullTime => "Очное",
-                    EducationType.FullTimeAndPartTime => "Очно-заочное",
-                    EducationType.PartTime => "Заочное",
-                    _ => "Не выбрано"
-                };
-                e.FormattingApplied = true;
-            }
-            else if (col.DataPropertyName == nameof(ApplicantModel.DateOfBirth))
-            {
-                if (e.Value is DateTime date)
-                {
-                    e.Value = date.ToShortDateString();
-                    e.FormattingApplied = true;
-                }
-            }
-            else if (col.DataPropertyName == nameof(ApplicantModel.TotalScore))
-            {
-                if (e.Value is int total)
-                {
-                    e.Value = $"{total} баллов";
-                    e.FormattingApplied = true;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Открытие формы добавления записи
-        /// </summary>
-        private void toolStripButtonAdd_Click(object sender, EventArgs e)
-        {
-            var addForm = new AddApplicantForm();
-
-            if (addForm.ShowDialog(this) == DialogResult.OK)
-            {
-                applicants.Add(addForm.CurrentApplicant);
-                OnUpdate();
-                MessageBox.Show("Абитуриент успешно добавлен!", "Успех",
-                    MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-        }
-
-        /// <summary>
-        /// Открытие формы редактирования записи
-        /// </summary>
-        private void toolStripButtonEdit_Click(object sender, EventArgs e)
-        {
-            if (dataGridView.SelectedRows.Count == 0)
-            {
-                MessageBox.Show("Выберите абитуриента для редактирования!", "Внимание",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            var selectedApplicant = (ApplicantModel)dataGridView.SelectedRows[0].DataBoundItem;
-            var selectedIndex = applicants.IndexOf(selectedApplicant);
-
-            var editForm = new AddApplicantForm(selectedApplicant);
-
-            if (editForm.ShowDialog() == DialogResult.OK)
-            {
-                if (selectedIndex >= 0 && selectedIndex < applicants.Count)
-                {
-                    applicants[selectedIndex] = editForm.CurrentApplicant;
-                    OnUpdate();
-                    MessageBox.Show("Абитуриент успешно обновлён!", "Успех",
-                        MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Удаление записи
-        /// </summary>
-        private void toolStripButtonDelete_Click(object sender, EventArgs e)
-        {
-            if (dataGridView.SelectedRows.Count == 0)
-            {
-                MessageBox.Show("Выберите абитуриента для удаления!", "Внимание",
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            var applicant = (ApplicantModel)dataGridView.SelectedRows[0].DataBoundItem;
-            var target = applicants.FirstOrDefault(x => x.Id == applicant.Id);
-
-            if (target != null &&
-                MessageBox.Show($"Вы действительно желаете удалить абитуриента '{target.FullName}'?",
-                    "Удаление абитуриента",
-                    MessageBoxButtons.YesNo,
-                    MessageBoxIcon.Question) == DialogResult.Yes)
-            {
-                applicants.Remove(target);
-                OnUpdate();
-            }
-        }
-
-        /// <summary>
-        /// Данные в statusStrip
-        /// </summary>
-        private void SetStatistic()
-        {
-            var totalApplicants = applicants.Count;
-            var highScorers = applicants.Count(a => a.TotalScore > 150);
-
-            toolStripStatusLabelCount.Text = $"Всего абитуриентов: {totalApplicants}";
-            toolStripStatusLabelHighScores.Text = $"Набрали >150 баллов: {highScorers}";
-        }
-
-        /// <summary>
-        /// Обновление данных в таблице
-        /// </summary>
-        public void OnUpdate()
-        {
-            bindingSource.ResetBindings(false);
-            dataGridView.Refresh();
-            SetStatistic();
         }
     }
 }
