@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DataGridView.Entities\DataGridView.Entities.csproj" />
+    <PackageReference Include="Arsehha.DataGridView.Entities" Version="1.0.0" />
   </ItemGroup>
-
 </Project>
