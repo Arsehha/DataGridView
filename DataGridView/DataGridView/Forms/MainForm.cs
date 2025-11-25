@@ -1,6 +1,8 @@
 ﻿
 using DataGridView.Entities;
+using DataGridView.Entities.Enums;
 using DataGridView.Services;
+using DataGridView.Services.Contracts;
 using DataGridViewProject.Infrastructure;
 
 namespace DataGridView.Forms
@@ -10,13 +12,13 @@ namespace DataGridView.Forms
     /// </summary>
     public partial class MainForm : Form
     {
-        private readonly ApplicantService applicantService;
+        private readonly IApplicantStorage applicantService;
         private readonly BindingSource bindingSource = new();
 
         /// <summary>
         /// Конструктор по умолчанию
         /// </summary>
-        public MainForm(ApplicantService applicantService)
+        public MainForm(IApplicantStorage applicantService)
         {
             this.applicantService = applicantService;
             InitializeComponent();
@@ -54,7 +56,10 @@ namespace DataGridView.Forms
 
         private async void toolStripButtonAdd_Click(object sender, EventArgs e)
         {
-            var form = new AddApplicantForm(new ApplicantModel());
+            var form = new AddApplicantForm(new ApplicantModel
+            {
+                DateOfBirth = DateTime.Now.AddYears(-18)
+            });
             if (form.ShowDialog() == DialogResult.OK)
             {
                 await applicantService.Add(form.Applicant, CancellationToken.None);
@@ -96,7 +101,7 @@ namespace DataGridView.Forms
                 e.Value = enumVal.GetDisplayName();
             }
 
-            if (dataGridView.Columns[e.ColumnIndex].Name == "TotalScores"
+            if (dataGridView.Columns[e.ColumnIndex].Name == "TotalScore"
                 && dataGridView.Rows[e.RowIndex].DataBoundItem is ApplicantModel student)
             {
                 e.Value = student.MathScore + student.RussianScore + student.InformaticsScore;
@@ -114,6 +119,43 @@ namespace DataGridView.Forms
                 await applicantService.Remove(selected.Id, CancellationToken.None);
                 await UpdateBindingSources();
             }
+        }
+
+        private async void MainForm_Load(object sender, EventArgs e)
+        {
+            await applicantService.Add(
+                new ApplicantModel
+                {
+                    FullName = "Артем Артан Артурович",
+                    Sex = SexType.Male,
+                    DateOfBirth = new(2006, 1, 24),
+                    EducationForm = EducationType.FullTime,
+                    MathScore = 50,
+                    RussianScore = 50,
+                    InformaticsScore = 0
+                }, CancellationToken.None);
+            await applicantService.Add(
+                new ApplicantModel
+                {
+                    FullName = "Фулл тайм Клиренс",
+                    Sex = SexType.Female,
+                    DateOfBirth = new(2006, 10, 21),
+                    EducationForm = EducationType.FullTimeAndPartTime,
+                    MathScore = 75,
+                    RussianScore = 34,
+                    InformaticsScore = 12
+                }, CancellationToken.None);
+            await applicantService.Add(new ApplicantModel
+            {
+                FullName = "Хеликоптер",
+                Sex = SexType.Female,
+                DateOfBirth = new(2006, 5, 02),
+                EducationForm = EducationType.FullTime,
+                MathScore = 12,
+                RussianScore = 100,
+                InformaticsScore = 100
+            }, CancellationToken.None);
+            await UpdateBindingSources();
         }
     }
 }

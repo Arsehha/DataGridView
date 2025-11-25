@@ -13,8 +13,8 @@ public class InMemoryStorage : IStorage
 
     public InMemoryStorage()
     {
-        applicants = new List<ApplicantModel>
-        {
+        applicants = new List<ApplicantModel>();
+        /*{
             new ApplicantModel {
                 FullName="Артем Артан Артурович",
                 Sex=SexType.Male,
@@ -42,7 +42,7 @@ public class InMemoryStorage : IStorage
                 RussianScore=4,
                 InformaticsScore=100
             },
-        };
+        };*/
     }
 
     public Task Add(ApplicantModel applicant, CancellationToken cancellationToken)

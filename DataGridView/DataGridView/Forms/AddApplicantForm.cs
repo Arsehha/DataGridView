@@ -29,27 +29,46 @@ namespace DataGridView.Forms
 
         private void InitBindings()
         {
-            comboBoxEducationForm.DataSource = Enum.GetValues(typeof(EducationType))
+            // Источник данных для формы обучения
+            comboBoxEducationForm.DataSource = Enum
+                .GetValues(typeof(EducationType))
                 .Cast<EducationType>()
-                .Select(g => new { Value = g, Name = g.GetDisplayName() })
-                .ToArray();
+                .Select(x => new { Value = x, Name = x.GetDisplayName() })
+                .ToList();
+
             comboBoxEducationForm.DisplayMember = "Name";
             comboBoxEducationForm.ValueMember = "Value";
 
-            comboBoxSex.DataSource = Enum.GetValues(typeof(SexType))
+            // Источник данных для пола
+            comboBoxSex.DataSource = Enum
+                .GetValues(typeof(SexType))
                 .Cast<SexType>()
-                .Select(g => new { Value = g, Name = g.GetDisplayName() })
-                .ToArray();
+                .Select(x => new { Value = x, Name = x.GetDisplayName() })
+                .ToList();
+
             comboBoxSex.DisplayMember = "Name";
             comboBoxSex.ValueMember = "Value";
 
+            // Привязки строковых и числовых полей
             textBoxFullName.AddBinding(x => x.Text, Applicant, x => x.FullName, errorProvider);
-            comboBoxSex.AddBinding(x => x.Text, Applicant, x => x.Sex, errorProvider);
-            comboBoxEducationForm.AddBinding(x => x.Text, Applicant, x => x.EducationForm, errorProvider);
-            dateTimePickerDateOfBirth.AddBinding(x => x.Text, Applicant, x => x.DateOfBirth, errorProvider);
+
             numericUpDownMathScore.AddBinding(x => x.Value, Applicant, x => x.MathScore, errorProvider);
             numericUpDownRussianScore.AddBinding(x => x.Value, Applicant, x => x.RussianScore, errorProvider);
             numericUpDownInformaticsScore.AddBinding(x => x.Value, Applicant, x => x.InformaticsScore, errorProvider);
+
+            comboBoxSex.DataBindings.Add(
+                new Binding("SelectedValue", Applicant, nameof(Applicant.Sex), true, DataSourceUpdateMode.OnPropertyChanged));
+
+            comboBoxEducationForm.DataBindings.Add(
+                new Binding("SelectedValue", Applicant, nameof(Applicant.EducationForm), true, DataSourceUpdateMode.OnPropertyChanged));
+
+            dateTimePickerDateOfBirth.DataBindings.Add(
+                new Binding("Value", Applicant, nameof(Applicant.DateOfBirth), true, DataSourceUpdateMode.OnPropertyChanged));
+
+            if (Applicant.DateOfBirth < dateTimePickerDateOfBirth.MinDate)
+            {
+                dateTimePickerDateOfBirth.Value = DateTime.Now.AddYears(-18);
+            }
         }
 
         private void buttonSave_Click(object sender, EventArgs e)
