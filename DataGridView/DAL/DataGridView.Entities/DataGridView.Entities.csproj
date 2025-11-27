@@ -12,7 +12,14 @@
     <RepositoryUrl>https://github.com/Arsehha/DataGridView</RepositoryUrl>
     <PackageTags>winforms;datafridview;macarena</PackageTags>
     <PackageId>Arsehha.$(AssemblyName)</PackageId>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <Product>DGV</Product>
+    <Version>1.0</Version>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DataGridView.Entities.Contracts\DataGridView.Entities.Contracts.csproj" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Update="avatar.png">

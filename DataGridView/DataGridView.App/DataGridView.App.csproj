@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BL\DataGridView.Services.Contracts\DataGridView.Services.Contracts.csproj" />
+    <ProjectReference Include="..\BL\DataGridView.Services\DataGridView.Services.csproj" />
+    <ProjectReference Include="..\DAL\DataGridView.Repository\DataGridView.Repository.csproj" />
+  </ItemGroup>
+
+</Project>

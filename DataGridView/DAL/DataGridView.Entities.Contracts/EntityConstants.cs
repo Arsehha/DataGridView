@@ -1,4 +1,4 @@
-﻿namespace DataGridView.Entities
+﻿namespace DataGridView.Entities.Contracts
 {
     /// <summary>
     /// Класс для констант сущностей

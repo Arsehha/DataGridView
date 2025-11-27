@@ -1,24 +1,22 @@
-﻿
+﻿using DataGridView.App.Infrastructure;
 using DataGridView.Entities;
 using DataGridView.Entities.Enums;
-using DataGridView.Services;
 using DataGridView.Services.Contracts;
-using DataGridViewProject.Infrastructure;
 
-namespace DataGridView.Forms
+namespace DataGridView.App.UI
 {
     /// <summary>
     /// Форма с информацией об абитуриентах
     /// </summary>
     public partial class MainForm : Form
     {
-        private readonly IApplicantStorage applicantService;
+        private readonly IApplicantService applicantService;
         private readonly BindingSource bindingSource = new();
 
         /// <summary>
         /// Конструктор по умолчанию
         /// </summary>
-        public MainForm(IApplicantStorage applicantService)
+        public MainForm(IApplicantService applicantService)
         {
             this.applicantService = applicantService;
             InitializeComponent();
@@ -51,7 +49,7 @@ namespace DataGridView.Forms
         private async Task RefreshStats()
         {
             toolStripStatusLabelCount.Text = $"Всего студентов: {await applicantService.GetCountStudents(CancellationToken.None)}";
-            toolStripStatusLabelHighScores.Text = $"Всего студентов с более 150 баллов: {await applicantService.GetStudentsByMinScore(Constants.MinTotalScore, CancellationToken.None)}";
+            toolStripStatusLabelHighScores.Text = $"Всего студентов с более 150 баллов: {await applicantService.GetStudentsByMinScore(ServiceConstants.MinTotalScore, CancellationToken.None)}";
         }
 
         private async void toolStripButtonAdd_Click(object sender, EventArgs e)

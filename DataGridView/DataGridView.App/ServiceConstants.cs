@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace DataGridView;
+﻿namespace DataGridView.App;
 
 /// <summary>
 /// Контстанты 
 /// </summary>
-public class Constants
+public class ServiceConstants
 {
     /// <summary>
     /// Минимальное общее кол-во баллов
