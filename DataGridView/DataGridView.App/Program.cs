@@ -7,7 +7,7 @@ namespace DataGridView.App
     internal static class Program
     {
         /// <summary>
-        ///  
+        /// Главная точка входа в приложение 
         /// </summary>
         [STAThread]
         static void Main()
