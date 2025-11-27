@@ -13,6 +13,8 @@
     <PackageTags>winforms;datafridview;macarena</PackageTags>
     <PackageId>Arsehha.$(AssemblyName)</PackageId>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <Product>DGV</Product>
+    <Version>1.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
