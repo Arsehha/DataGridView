@@ -1,6 +1,6 @@
 ﻿using DataGridView.Entities;
 
-namespace DataGridView.Services.Contracts
+namespace DataGridView.Repository.Contracts
 {
     /// <summary>
     /// Интерфейс хранилища

@@ -1,6 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using DataGridView.Entities.Attributes;
 using DataGridView.Entities.Enums;
+using DataGridView.Entities.Contracts;
+
 
 namespace DataGridView.Entities
 {

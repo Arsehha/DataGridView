@@ -1,12 +1,11 @@
-﻿
-using DataGridView.Entities;
+﻿using DataGridView.Entities;
 
 namespace DataGridView.Services.Contracts;
 
 /// <summary>
 /// Интерфейс для сервиса студентов
 /// </summary>
-public interface IApplicantStorage
+public interface IApplicantService
 {
     /// <summary>
     /// Добавить студента

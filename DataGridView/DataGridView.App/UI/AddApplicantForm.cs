@@ -1,11 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.Windows.Forms;
 using DataGridView.Entities;
 using DataGridView.Entities.Enums;
-using DataGridView.Services;
 using DataGridViewProject.Infrastructure;
 
-namespace DataGridView.Forms
+namespace DataGridView.App.UI
 {
     /// <summary>
     /// Форма редактирования студентов
