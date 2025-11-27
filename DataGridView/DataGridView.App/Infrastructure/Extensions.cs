@@ -2,7 +2,7 @@
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace DataGridViewProject.Infrastructure
+namespace DataGridView.App.Infrastructure
 {
     /// <summary>
     /// Статический класс методов расширения
@@ -89,7 +89,7 @@ namespace DataGridViewProject.Infrastructure
 
         private static string GetPropertyName<TType>(Expression<Func<TType, object>> expression)
         {
-            Expression body = expression.Body;
+            var body = expression.Body;
             if (body.NodeType == ExpressionType.Convert)
             {
                 body = ((UnaryExpression)body).Operand;

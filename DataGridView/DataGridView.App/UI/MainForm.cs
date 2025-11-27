@@ -1,8 +1,7 @@
-﻿
+﻿using DataGridView.App.Infrastructure;
 using DataGridView.Entities;
 using DataGridView.Entities.Enums;
 using DataGridView.Services.Contracts;
-using DataGridViewProject.Infrastructure;
 
 namespace DataGridView.App.UI
 {
@@ -50,7 +49,7 @@ namespace DataGridView.App.UI
         private async Task RefreshStats()
         {
             toolStripStatusLabelCount.Text = $"Всего студентов: {await applicantService.GetCountStudents(CancellationToken.None)}";
-            toolStripStatusLabelHighScores.Text = $"Всего студентов с более 150 баллов: {await applicantService.GetStudentsByMinScore(Constants.MinTotalScore, CancellationToken.None)}";
+            toolStripStatusLabelHighScores.Text = $"Всего студентов с более 150 баллов: {await applicantService.GetStudentsByMinScore(ServiceConstants.MinTotalScore, CancellationToken.None)}";
         }
 
         private async void toolStripButtonAdd_Click(object sender, EventArgs e)

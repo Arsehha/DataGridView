@@ -1,7 +1,7 @@
 ﻿using DataGridView.Entities;
 using DataGridView.Repository.Contracts;
 
-namespace DataGridView.Services;
+namespace DataGridView.Repository;
 
 /// <summary>
 /// Хранилище студентов в оперативной памяти

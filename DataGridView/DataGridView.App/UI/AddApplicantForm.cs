@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using DataGridView.App.Infrastructure;
 using DataGridView.Entities;
 using DataGridView.Entities.Enums;
-using DataGridViewProject.Infrastructure;
 
 namespace DataGridView.App.UI
 {
