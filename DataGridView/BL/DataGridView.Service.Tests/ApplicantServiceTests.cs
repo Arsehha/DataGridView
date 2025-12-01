@@ -4,6 +4,8 @@ using DataGridView.Repository.Contracts;
 using DataGridView.Services;
 using DataGridView.Services.Contracts;
 using FluentAssertions;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Xunit;
 
@@ -17,11 +19,13 @@ namespace DataGridView.Service.Tests
         private readonly Mock<IStorage> storageMock;
         private readonly IApplicantService service;
         private readonly CancellationToken ct = CancellationToken.None;
+        private readonly ILoggerFactory loggerFactory = NullLoggerFactory.Instance;
 
         public ApplicantServiceTests()
         {
             storageMock = new Mock<IStorage>();
-            service = new ApplicantService(storageMock.Object);
+            loggerFactory = NullLoggerFactory.Instance;
+            service = new ApplicantService(storageMock.Object, loggerFactory);
         }
 
         /// <summary>

@@ -2,7 +2,9 @@
 using DataGridView.Entities;
 using DataGridView.Repository.Contracts;
 using DataGridView.Services.Contracts;
+using Microsoft.Extensions.Logging;
 using Serilog;
+using Serilog.Core;
 
 namespace DataGridView.Services;
 
@@ -13,13 +15,15 @@ public class ApplicantService : IApplicantService
 {
 
     private readonly IStorage storage;
+    private readonly ILogger<ApplicantService> logger;
 
     /// <summary>
     /// Инициализировать новый экземпляр
     /// </summary>
-    public ApplicantService(IStorage storage)
+    public ApplicantService(IStorage storage, ILoggerFactory loggerFactory)
     {
         this.storage = storage;
+        logger = loggerFactory.CreateLogger<ApplicantService>();
     }
 
     /// <summary>
@@ -28,16 +32,9 @@ public class ApplicantService : IApplicantService
     public async Task Add(ApplicantModel student, CancellationToken cancellationToken)
     {
         var sw = Stopwatch.StartNew();
-        try
-        {
-            await storage.Add(student, cancellationToken);
-        }
-        finally
-        {
-            sw.Stop();
-            double ms = sw.ElapsedTicks * 1000.0 / Stopwatch.Frequency;
-            Log.Debug("ApplicantService.Add выполнен за {ms:F6} мс", ms);
-        }
+        await storage.Add(student, cancellationToken);
+
+        logger.LogDebug("ApplicantService.Add выполнен за {ms} мс", sw.ElapsedMilliseconds);
     }
 
     /// <summary>
@@ -46,17 +43,10 @@ public class ApplicantService : IApplicantService
     public async Task Remove(Guid id, CancellationToken cancellationToken)
     {
         var sw = Stopwatch.StartNew();
-        try
-        {
-            var std = await storage.GetById(id, cancellationToken);
-            await storage.Remove(std, cancellationToken);
-        }
-        finally
-        {
-            sw.Stop();
-            double ms = sw.ElapsedTicks * 1000.0 / Stopwatch.Frequency;
-            Log.Debug("ApplicantService.Remove выполнен за {ms:F6} мс", ms);
-        }
+        var std = await storage.GetById(id, cancellationToken);
+        await storage.Remove(std, cancellationToken);
+
+        logger.LogDebug("ApplicantService.Remove выполнен за {ms} мс", sw.ElapsedMilliseconds);
     }
 
     /// <summary>
@@ -65,26 +55,19 @@ public class ApplicantService : IApplicantService
     public async Task Update(ApplicantModel student, CancellationToken cancellationToken)
     {
         var sw = Stopwatch.StartNew();
-        try
-        {
-            var std = await storage.GetById(student.Id, cancellationToken);
+        var std = await storage.GetById(student.Id, cancellationToken);
 
-            std.DateOfBirth = student.DateOfBirth;
-            std.Sex = student.Sex;
-            std.EducationForm = student.EducationForm;
-            std.FullName = student.FullName;
-            std.InformaticsScore = student.InformaticsScore;
-            std.RussianScore = student.RussianScore;
-            std.MathScore = student.MathScore;
+        std.DateOfBirth = student.DateOfBirth;
+        std.Sex = student.Sex;
+        std.EducationForm = student.EducationForm;
+        std.FullName = student.FullName;
+        std.InformaticsScore = student.InformaticsScore;
+        std.RussianScore = student.RussianScore;
+        std.MathScore = student.MathScore;
 
-            await storage.Update(std, cancellationToken);
-        }
-        finally
-        {
-            sw.Stop();
-            double ms = sw.ElapsedTicks * 1000.0 / Stopwatch.Frequency;
-            Log.Debug("ApplicantService.Update выполнен за {ms:F6} мс", ms);
-        }
+        await storage.Update(std, cancellationToken);
+
+        logger.LogDebug("ApplicantService.Update выполнен за {ms} мс", sw.ElapsedMilliseconds);
     }
 
     /// <summary>
@@ -93,16 +76,10 @@ public class ApplicantService : IApplicantService
     public async Task<ICollection<ApplicantModel>> GetAll(CancellationToken cancellationToken)
     {
         var sw = Stopwatch.StartNew();
-        try
-        {
-            return await storage.GetAll(cancellationToken);
-        }
-        finally
-        {
-            sw.Stop();
-            double ms = sw.ElapsedTicks * 1000.0 / Stopwatch.Frequency;
-            Log.Debug("ApplicantService.GetAll выполнен за {ms:F6} мс", ms);
-        }
+        var res = await storage.GetAll(cancellationToken);
+
+        logger.LogDebug("ApplicantService.GetAll выполнен за {ms} мс", sw.ElapsedMilliseconds);
+        return res;
     }
 
     /// <summary>
@@ -111,16 +88,12 @@ public class ApplicantService : IApplicantService
     public async Task<int> GetStudentsByMinScore(int count, CancellationToken cancellationToken)
     {
         var sw = Stopwatch.StartNew();
-        try
-        {
-            var stds = await storage.GetAll(cancellationToken);
-            return stds.Count(x => x.InformaticsScore + x.MathScore + x.RussianScore > count);
-        }
-        finally
-        {
-            sw.Stop();
-            Log.Debug("ApplicantService.GetStudentsByMinScore выполнен за {ms:F6} мс", sw.ElapsedMilliseconds);
-        }
+        var stds = await storage.GetAll(cancellationToken);
+
+        var total = stds.Count(x => x.InformaticsScore + x.MathScore + x.RussianScore > count);
+
+        logger.LogDebug("ApplicantService.GetStudentsByMinScore выполнен за {ms} мс", sw.ElapsedMilliseconds);
+        return total;
     }
 
     /// <summary>
@@ -129,15 +102,10 @@ public class ApplicantService : IApplicantService
     public async Task<int> GetCountStudents(CancellationToken cancellationToken)
     {
         var sw = Stopwatch.StartNew();
-        try
-        {
-            return await storage.GetCount(cancellationToken);
-        }
-        finally
-        {
-            sw.Stop();
-            Log.Debug("ApplicantService.GetCountStudents выполнен за {ms:F6} мс", sw.ElapsedMilliseconds);
-        }
+        var total = await storage.GetCount(cancellationToken);
+
+        logger.LogDebug("ApplicantService.GetCountStudents выполнен за {ms} мс", sw.ElapsedMilliseconds);
+        return total;
     }
 
 }
