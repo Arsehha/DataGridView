@@ -32,9 +32,19 @@ public class ApplicantService : IApplicantService
     public async Task Add(ApplicantModel student, CancellationToken cancellationToken)
     {
         var sw = Stopwatch.StartNew();
-        await storage.Add(student, cancellationToken);
-
-        logger.LogDebug("ApplicantService.Add выполнен за {ms} мс", sw.ElapsedMilliseconds);
+        try
+        {
+            await storage.Add(student, cancellationToken);
+            sw.Stop();
+            logger.LogDebug("ApplicantService.Add выполнен за {ms} мс", sw.ElapsedMilliseconds);
+        }
+        finally
+        {
+            if (sw.IsRunning)
+            {
+                sw.Stop();
+            }
+        }
     }
 
     /// <summary>
@@ -43,10 +53,19 @@ public class ApplicantService : IApplicantService
     public async Task Remove(Guid id, CancellationToken cancellationToken)
     {
         var sw = Stopwatch.StartNew();
-        var std = await storage.GetById(id, cancellationToken);
-        await storage.Remove(std, cancellationToken);
-
-        logger.LogDebug("ApplicantService.Remove выполнен за {ms} мс", sw.ElapsedMilliseconds);
+        try
+        {
+            var std = await storage.GetById(id, cancellationToken);
+            await storage.Remove(std, cancellationToken);
+            logger.LogDebug("ApplicantService.Remove выполнен за {ms} мс", sw.ElapsedMilliseconds);
+        }
+        finally
+        {
+            if (sw.IsRunning)
+            {
+                sw.Stop();
+            }
+        }
     }
 
     /// <summary>
@@ -55,19 +74,29 @@ public class ApplicantService : IApplicantService
     public async Task Update(ApplicantModel student, CancellationToken cancellationToken)
     {
         var sw = Stopwatch.StartNew();
-        var std = await storage.GetById(student.Id, cancellationToken);
+        try
+        {
+            var std = await storage.GetById(student.Id, cancellationToken);
 
-        std.DateOfBirth = student.DateOfBirth;
-        std.Sex = student.Sex;
-        std.EducationForm = student.EducationForm;
-        std.FullName = student.FullName;
-        std.InformaticsScore = student.InformaticsScore;
-        std.RussianScore = student.RussianScore;
-        std.MathScore = student.MathScore;
+            std.DateOfBirth = student.DateOfBirth;
+            std.Sex = student.Sex;
+            std.EducationForm = student.EducationForm;
+            std.FullName = student.FullName;
+            std.InformaticsScore = student.InformaticsScore;
+            std.RussianScore = student.RussianScore;
+            std.MathScore = student.MathScore;
 
-        await storage.Update(std, cancellationToken);
+            await storage.Update(std, cancellationToken);
 
-        logger.LogDebug("ApplicantService.Update выполнен за {ms} мс", sw.ElapsedMilliseconds);
+            logger.LogDebug("ApplicantService.Update выполнен за {ms} мс", sw.ElapsedMilliseconds);
+        }
+        finally
+        {
+            if (sw.IsRunning)
+            {
+                sw.Stop();
+            }
+        }
     }
 
     /// <summary>
@@ -76,10 +105,20 @@ public class ApplicantService : IApplicantService
     public async Task<ICollection<ApplicantModel>> GetAll(CancellationToken cancellationToken)
     {
         var sw = Stopwatch.StartNew();
-        var res = await storage.GetAll(cancellationToken);
+        try
+        {
+            var res = await storage.GetAll(cancellationToken);
 
-        logger.LogDebug("ApplicantService.GetAll выполнен за {ms} мс", sw.ElapsedMilliseconds);
-        return res;
+            logger.LogDebug("ApplicantService.GetAll выполнен за {ms} мс", sw.ElapsedMilliseconds);
+            return res;
+        }
+        finally
+        {
+            if (sw.IsRunning)
+            {
+                sw.Stop();
+            }
+        }
     }
 
     /// <summary>
@@ -88,12 +127,22 @@ public class ApplicantService : IApplicantService
     public async Task<int> GetStudentsByMinScore(int count, CancellationToken cancellationToken)
     {
         var sw = Stopwatch.StartNew();
-        var stds = await storage.GetAll(cancellationToken);
+        try
+        {
+            var stds = await storage.GetAll(cancellationToken);
 
-        var total = stds.Count(x => x.InformaticsScore + x.MathScore + x.RussianScore > count);
+            var total = stds.Count(x => x.InformaticsScore + x.MathScore + x.RussianScore > count);
 
-        logger.LogDebug("ApplicantService.GetStudentsByMinScore выполнен за {ms} мс", sw.ElapsedMilliseconds);
-        return total;
+            logger.LogDebug("ApplicantService.GetStudentsByMinScore выполнен за {ms} мс", sw.ElapsedMilliseconds);
+            return total;
+        }
+        finally
+        {
+            if (sw.IsRunning)
+            {
+                sw.Stop();
+            }
+        }
     }
 
     /// <summary>
@@ -102,10 +151,20 @@ public class ApplicantService : IApplicantService
     public async Task<int> GetCountStudents(CancellationToken cancellationToken)
     {
         var sw = Stopwatch.StartNew();
-        var total = await storage.GetCount(cancellationToken);
+        try
+        {
+            var total = await storage.GetCount(cancellationToken);
 
-        logger.LogDebug("ApplicantService.GetCountStudents выполнен за {ms} мс", sw.ElapsedMilliseconds);
-        return total;
+            logger.LogDebug("ApplicantService.GetCountStudents выполнен за {ms} мс", sw.ElapsedMilliseconds);
+            return total;
+        }
+        finally
+        {
+            if (sw.IsRunning)
+            {
+                sw.Stop();
+            }
+        }
     }
 
 }
