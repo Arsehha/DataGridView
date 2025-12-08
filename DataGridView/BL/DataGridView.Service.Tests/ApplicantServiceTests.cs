@@ -1,71 +1,82 @@
 ﻿using DataGridView.Entities;
-using DataGridView.Services;
-using FluentAssertions;
-using Xunit;
 using DataGridView.Entities.Enums;
 using DataGridView.Repository.Contracts;
+using DataGridView.Services;
 using DataGridView.Services.Contracts;
-using DataGridView.Repository;
+using FluentAssertions;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using Moq;
+using Xunit;
 
-/*namespace DataGridView.Service.Tests
+namespace DataGridView.Service.Tests
 {
+    /// <summary>
+    /// Набор модульных тестов для проверки работы <see cref="ApplicantService"/>.
+    /// </summary>
     public class ApplicantServiceTests
     {
-        private readonly IStorage storage;
+        private readonly Mock<IStorage> storageMock;
         private readonly IApplicantService service;
         private readonly CancellationToken ct = CancellationToken.None;
+        private readonly ILoggerFactory loggerFactory = NullLoggerFactory.Instance;
 
         public ApplicantServiceTests()
         {
-            storage = new InMemoryStorage();
-            service = new ApplicantService(storage);
+            storageMock = new Mock<IStorage>();
+            loggerFactory = NullLoggerFactory.Instance;
+            service = new ApplicantService(storageMock.Object, loggerFactory);
         }
 
         /// <summary>
-        /// Добавление аббитуриента
+        /// Проверяет, что при добавлении абитуриента сервис вызывает метод Add хранилища.
         /// </summary>
         [Fact]
-        public async Task Add_ShouldCallStorageAdd()
+        public async Task AddShouldCallStorageAdd()
         {
-            //Arrange
+            // Arrange
             var applicant = new ApplicantModel();
 
-            //Act
+            // Act
             await service.Add(applicant, ct);
 
-            //Assert
-
+            // Assert
+            storageMock.Verify(s => s.Add(applicant, ct), Times.Once);
         }
 
-        // -------------------------
-        // Remove
-        // -------------------------
+        /// <summary>
+        /// Проверяет, что сервис запрашивает сущность по ID и затем удаляет её.
+        /// </summary>
         [Fact]
-        public async Task Remove_ShouldCallGetById_AndRemove()
+        public async Task RemoveShouldGetByIdAndRemove()
         {
+            // Arrange
             var id = Guid.NewGuid();
             var entity = new ApplicantModel { Id = id };
 
-            storage.Entities.Add(entity);
+            storageMock
+                .Setup(s => s.GetById(id, ct))
+                .ReturnsAsync(entity);
 
+            // Act
             await service.Remove(id, ct);
 
-            storage.GetByIdCalled.Should().BeTrue();
-            storage.RemoveCalled.Should().BeTrue();
-            storage.RemoveEntity.Should().Be(entity);
+            // Assert
+            storageMock.Verify(s => s.GetById(id, ct), Times.Once);
+            storageMock.Verify(s => s.Remove(entity, ct), Times.Once);
         }
 
-        // -------------------------
-        // Update
-        // -------------------------
+        /// <summary>
+        /// Проверяет, что сервис загружает существующую сущность,
+        /// копирует в неё переданные данные и вызывает обновление в хранилище.
+        /// </summary>
         [Fact]
-        public async Task Update_ShouldLoadEntity_CopyProps_AndUpdate()
+        public async Task UpdateShouldLoadEntityCopyPropsAndUpdate()
         {
+            // Arrange
             var id = Guid.NewGuid();
+
             var existing = new ApplicantModel { Id = id };
-
-            storage.Entities.Add(existing);
-
             var incoming = new ApplicantModel
             {
                 Id = id,
@@ -78,8 +89,14 @@ using DataGridView.Repository;
                 MathScore = 70
             };
 
+            storageMock
+                .Setup(s => s.GetById(id, ct))
+                .ReturnsAsync(existing);
+
+            // Act
             await service.Update(incoming, ct);
 
+            // Assert
             existing.DateOfBirth.Should().Be(incoming.DateOfBirth);
             existing.Sex.Should().Be(incoming.Sex);
             existing.EducationForm.Should().Be(incoming.EducationForm);
@@ -88,72 +105,97 @@ using DataGridView.Repository;
             existing.RussianScore.Should().Be(incoming.RussianScore);
             existing.MathScore.Should().Be(incoming.MathScore);
 
-            storage.UpdateCalled.Should().BeTrue();
-            storage.UpdateEntity.Should().Be(existing);
+            storageMock.Verify(s => s.Update(existing, ct), Times.Once);
         }
 
-        // -------------------------
-        // GetAll
-        // -------------------------
+        /// <summary>
+        /// Проверяет, что сервис возвращает данные, которые предоставляет хранилище.
+        /// </summary>
         [Fact]
-        public async Task GetAll_ShouldReturnAllEntities()
+        public async Task GetAllShouldReturnDataFromStorage()
         {
+            // Arrange
             var list = new List<ApplicantModel>
             {
                 new ApplicantModel(),
                 new ApplicantModel()
             };
 
-            storage.Entities = list;
+            storageMock
+                .Setup(s => s.GetAll(ct))
+                .ReturnsAsync(list);
 
+            // Act
             var result = await service.GetAll(ct);
 
+            // Assert
             result.Should().BeSameAs(list);
         }
 
-        // -------------------------
-        // GetStudentsByMinScore
-        // -------------------------
+        /// <summary>
+        /// Проверяет, что сервис корректно вычисляет количество абитуриентов,
+        /// имеющих сумму баллов выше заданного порога.
+        /// </summary>
         [Fact]
-        public async Task GetStudentsByMinScore_ShouldReturnCorrectCount()
+        public async Task GetStudentsByMinScoreShouldReturnCorrectCount()
         {
-            storage.Entities = new List<ApplicantModel>
-            {
-                new ApplicantModel { InformaticsScore = 30, MathScore = 30, RussianScore = 30 }, // 90 > 80
-                new ApplicantModel { InformaticsScore = 20, MathScore = 20, RussianScore = 20 }  // 60 <= 80
-            };
+            // Arrange
+            storageMock
+                .Setup(s => s.GetAll(ct))
+                .ReturnsAsync(new List<ApplicantModel>
+                {
+                    new ApplicantModel { InformaticsScore = 30, MathScore = 30, RussianScore = 30 },
+                    new ApplicantModel { InformaticsScore = 10, MathScore = 10, RussianScore = 10 }
+                });
 
+            // Act
             var result = await service.GetStudentsByMinScore(80, ct);
 
+            // Assert
             result.Should().Be(1);
         }
 
+        /// <summary>
+        /// Проверяет, что сервис возвращает 0,
+        /// если ни один абитуриент не превышает пороговое значение суммы баллов.
+        /// </summary>
         [Fact]
-        public async Task GetStudentsByMinScore_ShouldReturnZero_WhenNoneMatch()
+        public async Task GetStudentsByMinScoreShouldReturnZeroWhenNoOneIsAboveThreshold()
         {
-            storage.Entities = new List<ApplicantModel>
-            {
-                new ApplicantModel { InformaticsScore = 10, MathScore = 10, RussianScore = 10 },
-                new ApplicantModel { InformaticsScore = 20, MathScore = 20, RussianScore = 20 }
-            };
+            // Arrange
+            storageMock
+                .Setup(s => s.GetAll(ct))
+                .ReturnsAsync(new List<ApplicantModel>
+                {
+                    new ApplicantModel { InformaticsScore = 10, MathScore = 10, RussianScore = 10 },
+                    new ApplicantModel { InformaticsScore = 20, MathScore = 20, RussianScore = 20 }
+                });
 
+            // Act
             var result = await service.GetStudentsByMinScore(100, ct);
 
+            // Assert
             result.Should().Be(0);
         }
 
-        // -------------------------
-        // GetCountStudents
-        // -------------------------
+        /// <summary>
+        /// Проверяет, что сервис возвращает значение,
+        /// предоставленное хранилищем при подсчёте количества абитуриентов.
+        /// </summary>
         [Fact]
-        public async Task GetCountStudents_ShouldReturnCount()
+        public async Task GetCountStudentsShouldReturnValueFromStorage()
         {
-            storage.CountValue = 3;
+            // Arrange
+            storageMock
+                .Setup(s => s.GetCount(ct))
+                .ReturnsAsync(3);
 
+            // Act
             var result = await service.GetCountStudents(ct);
 
+            // Assert
             result.Should().Be(3);
         }
     }
 }
-*/
+
