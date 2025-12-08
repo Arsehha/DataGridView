@@ -1,4 +1,4 @@
-﻿namespace DataGridView.Enums
+﻿namespace DataGridView.Entities.Enums
 {
     /// <summary>
     /// Перечисление возможных форм обучение

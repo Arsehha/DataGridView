@@ -1,4 +1,4 @@
-﻿namespace DataGridView.Forms
+﻿namespace DataGridView.App.UI
 {
     partial class AddApplicantForm
     {
@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            components = new System.ComponentModel.Container();
             label1 = new Label();
             label2 = new Label();
             label3 = new Label();
@@ -36,7 +37,6 @@
             label6 = new Label();
             label7 = new Label();
             buttonSave = new Button();
-            button2 = new Button();
             numericUpDownMathScore = new NumericUpDown();
             numericUpDownRussianScore = new NumericUpDown();
             numericUpDownInformaticsScore = new NumericUpDown();
@@ -44,9 +44,11 @@
             comboBoxEducationForm = new ComboBox();
             textBoxFullName = new TextBox();
             dateTimePickerDateOfBirth = new DateTimePicker();
+            errorProvider = new ErrorProvider(components);
             ((System.ComponentModel.ISupportInitialize)numericUpDownMathScore).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numericUpDownRussianScore).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numericUpDownInformaticsScore).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)errorProvider).BeginInit();
             SuspendLayout();
             // 
             // label1
@@ -114,23 +116,13 @@
             // 
             // buttonSave
             // 
-            buttonSave.Location = new Point(128, 255);
+            buttonSave.Location = new Point(160, 261);
             buttonSave.Name = "buttonSave";
             buttonSave.Size = new Size(75, 23);
             buttonSave.TabIndex = 7;
             buttonSave.Text = "Сохранить";
             buttonSave.UseVisualStyleBackColor = true;
             buttonSave.Click += buttonSave_Click;
-            // 
-            // button2
-            // 
-            button2.Location = new Point(248, 255);
-            button2.Name = "button2";
-            button2.Size = new Size(75, 23);
-            button2.TabIndex = 8;
-            button2.Text = "Отмена";
-            button2.UseVisualStyleBackColor = true;
-            button2.Click += buttonCancel_Click;
             // 
             // numericUpDownMathScore
             // 
@@ -185,6 +177,10 @@
             dateTimePickerDateOfBirth.TabIndex = 15;
             dateTimePickerDateOfBirth.Value = new DateTime(2025, 10, 23, 0, 0, 0, 0);
             // 
+            // errorProvider
+            // 
+            errorProvider.ContainerControl = this;
+            // 
             // AddApplicantForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -197,7 +193,6 @@
             Controls.Add(numericUpDownInformaticsScore);
             Controls.Add(numericUpDownRussianScore);
             Controls.Add(numericUpDownMathScore);
-            Controls.Add(button2);
             Controls.Add(buttonSave);
             Controls.Add(label7);
             Controls.Add(label6);
@@ -211,6 +206,7 @@
             ((System.ComponentModel.ISupportInitialize)numericUpDownMathScore).EndInit();
             ((System.ComponentModel.ISupportInitialize)numericUpDownRussianScore).EndInit();
             ((System.ComponentModel.ISupportInitialize)numericUpDownInformaticsScore).EndInit();
+            ((System.ComponentModel.ISupportInitialize)errorProvider).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -225,7 +221,6 @@
         private Label label6;
         private Label label7;
         private Button buttonSave;
-        private Button button2;
         private NumericUpDown numericUpDownMathScore;
         private NumericUpDown numericUpDownRussianScore;
         private NumericUpDown numericUpDownInformaticsScore;
@@ -233,5 +228,6 @@
         private ComboBox comboBoxEducationForm;
         private TextBox textBoxFullName;
         private DateTimePicker dateTimePickerDateOfBirth;
+        private ErrorProvider errorProvider;
     }
 }

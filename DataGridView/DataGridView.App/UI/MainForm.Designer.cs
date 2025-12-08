@@ -1,4 +1,4 @@
-﻿namespace DataGridView.Forms
+﻿namespace DataGridView.App.UI
 {
     partial class MainForm
     {
@@ -112,12 +112,12 @@
             // 
             // dataGridView
             // 
+            dataGridView.AllowUserToAddRows = false;
             dataGridView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dataGridView.Columns.AddRange(new DataGridViewColumn[] { FullName, Sex, DateOfBirth, EducationForm, MathScore, RussianScore, InformaticsScore, TotalScore });
             dataGridView.Dock = DockStyle.Fill;
             dataGridView.Location = new Point(0, 25);
             dataGridView.Name = "dataGridView";
-            dataGridView.RowTemplate.Height = 25;
             dataGridView.Size = new Size(800, 403);
             dataGridView.TabIndex = 2;
             dataGridView.CellFormatting += dataGridView_CellFormatting;
@@ -184,6 +184,7 @@
             Controls.Add(toolStrip);
             Name = "MainForm";
             Text = "Управление абитуриентами";
+            Load += MainForm_Load;
             toolStrip.ResumeLayout(false);
             toolStrip.PerformLayout();
             statusStrip.ResumeLayout(false);

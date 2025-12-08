@@ -1,11 +1,13 @@
-using DataGridView.Forms;
+﻿using DataGridView.App.UI;
+using DataGridView.Repository;
+using DataGridView.Services;
 
-namespace DataGridView
+namespace DataGridView.App
 {
     internal static class Program
     {
         /// <summary>
-        ///  The main entry point for the application.
+        /// Главная точка входа в приложение 
         /// </summary>
         [STAThread]
         static void Main()
@@ -13,7 +15,7 @@ namespace DataGridView
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
-            Application.Run(new MainForm());
+            Application.Run(new MainForm(new ApplicantService(new InMemoryStorage())));
         }
     }
 }
