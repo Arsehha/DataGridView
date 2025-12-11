@@ -184,7 +184,6 @@
             Controls.Add(toolStrip);
             Name = "MainForm";
             Text = "Управление абитуриентами";
-            Load += MainForm_Load;
             toolStrip.ResumeLayout(false);
             toolStrip.PerformLayout();
             statusStrip.ResumeLayout(false);

@@ -25,7 +25,7 @@ namespace DataGridView.Repository.Contracts
         /// <summary>
         /// Получить студента по идентификатору
         /// </summary>
-        public Task<ApplicantModel> GetById(Guid id, CancellationToken cancellationToken);
+        public Task<ApplicantModel?> GetById(Guid id, CancellationToken cancellationToken);
 
         /// <summary>
         /// Получить всех студентов

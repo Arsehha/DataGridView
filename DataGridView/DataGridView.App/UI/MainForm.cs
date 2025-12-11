@@ -118,42 +118,5 @@ namespace DataGridView.App.UI
                 await UpdateBindingSources();
             }
         }
-
-        private async void MainForm_Load(object sender, EventArgs e)
-        {
-            await applicantService.Add(
-                new ApplicantModel
-                {
-                    FullName = "Артем Артан Артурович",
-                    Sex = SexType.Male,
-                    DateOfBirth = new(2006, 1, 24),
-                    EducationForm = EducationType.FullTime,
-                    MathScore = 50,
-                    RussianScore = 50,
-                    InformaticsScore = 0
-                }, CancellationToken.None);
-            await applicantService.Add(
-                new ApplicantModel
-                {
-                    FullName = "Фулл тайм Клиренс",
-                    Sex = SexType.Female,
-                    DateOfBirth = new(2006, 10, 21),
-                    EducationForm = EducationType.FullTimeAndPartTime,
-                    MathScore = 75,
-                    RussianScore = 34,
-                    InformaticsScore = 12
-                }, CancellationToken.None);
-            await applicantService.Add(new ApplicantModel
-            {
-                FullName = "Хеликоптер",
-                Sex = SexType.Female,
-                DateOfBirth = new(2006, 5, 02),
-                EducationForm = EducationType.FullTime,
-                MathScore = 12,
-                RussianScore = 100,
-                InformaticsScore = 100
-            }, CancellationToken.None);
-            await UpdateBindingSources();
-        }
     }
 }
