@@ -3,8 +3,6 @@ using DataGridView.Entities;
 using DataGridView.Repository.Contracts;
 using DataGridView.Services.Contracts;
 using Microsoft.Extensions.Logging;
-using Serilog;
-using Serilog.Core;
 
 namespace DataGridView.Services;
 

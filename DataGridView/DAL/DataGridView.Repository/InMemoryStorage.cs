@@ -49,7 +49,7 @@ public class InMemoryStorage : IStorage
     /// <summary>
     /// Получение абитуриента из базы
     /// </summary>
-    public Task<ApplicantModel> GetById(Guid id, CancellationToken cancellationToken)
+    public Task<ApplicantModel?> GetById(Guid id, CancellationToken cancellationToken)
     {
         return Task.FromResult(applicants.FirstOrDefault(x => x.Id == id))!;
     }
