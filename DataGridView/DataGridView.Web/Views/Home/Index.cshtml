@@ -1,8 +1,129 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@using DataGridView.Web.Models
+@model IndexViewModel
+
+@{
+    ViewData["Title"] = "Список абитуриентов";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<h2>Список абитуриентов</h2>
+
+<div style="margin-bottom: 10px;">
+    <a asp-action="Create" class="btn btn-outline-secondary">Добавить</a>
+    <span style="margin: 0 8px;"></span>
+    <a asp-action="Index" class="btn btn-outline-secondary">Обновить</a>
 </div>
+
+<div style="margin-top: 30px;">
+    @if (Model.Applicants != null && Model.Applicants.Any())
+    {
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>ФИО</th>
+                            <th>Пол</th>
+                            <th>Дата рождения</th>
+                            <th>Форма обучения</th>
+                            <th>Математика</th>
+                            <th>Русский язык</th>
+                            <th>Информатика</th>
+                            <th>Сумма баллов</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var applicant in Model.Applicants)
+                    {
+                        var totalScore = applicant.MathScore + applicant.RussianScore + applicant.InformaticsScore;
+
+                                <tr>
+                                    <td>@applicant.FullName</td>
+                                    <td>@applicant.Sex</td>
+                                    <td>@applicant.DateOfBirth.ToString("dd.MM.yyyy")</td>
+                                    <td>@applicant.EducationForm</td>
+                                    <td>@applicant.MathScore</td>
+                                    <td>@applicant.RussianScore</td>
+                                    <td>@applicant.InformaticsScore</td>
+                                    <td>@totalScore</td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a asp-action="Edit" asp-route-id="@applicant.Id"
+                                               class="btn btn-sm btn-outline-primary"
+                                               title="Редактировать">
+                                                <i class="bi bi-pencil"></i> Редактировать
+                                            </a>
+                                            <span style="margin: 0 8px;"></span>
+                                            <a asp-action="Delete" asp-route-id="@applicant.Id"
+                                               class="btn btn-sm btn-outline-danger"
+                                               title="Удалить">
+                                                <i class="bi bi-trash"></i> Удалить
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+    }
+    else
+    {
+            <div class="alert alert-info" role="alert">
+                Абитуриентов нет. Нажмите "Добавить", чтобы добавить первого.
+            </div>
+    }
+</div>
+
+        <div class="statistics-card" style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-top: 30px; border: 1px solid #dee2e6;">
+            <h4>Статистика</h4>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="stat-item">
+                        <span class="stat-label">Всего абитуриентов:</span>
+                        <span class="stat-value">@Model.CountStatistics</span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-item">
+                        <span class="stat-label">Набрали ≥ @DataGridView.Web.ServiceConstants.MinTotalScore баллов:</span>
+                        <span class="stat-value">@Model.CountByMinStatistics</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+<style>
+    .stat-item {
+        padding: 10px;
+        background-color: white;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .stat-label {
+        display: block;
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+
+    .stat-value {
+        display: block;
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #212529;
+    }
+
+    .table th {
+        background-color: #343a40;
+        color: white;
+        vertical-align: middle;
+    }
+
+    .table td {
+        vertical-align: middle;
+    }
+
+    .btn-group {
+        gap: 5px;
+    }
+</style>

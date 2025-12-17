@@ -5,7 +5,7 @@ namespace DataGridView.Entities.Attributes
     /// <summary>
     /// Атрибут валидации для проверки возраста
     /// </summary>
-    internal sealed class DateRangeAttribute : ValidationAttribute
+    public sealed class DateRangeAttribute : ValidationAttribute
     {
         private readonly DateTime minDate;
         private readonly DateTime maxDate;

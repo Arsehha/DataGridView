@@ -1,7 +1,14 @@
+﻿using DataGridView.Repository;
+using DataGridView.Repository.Contracts;
+using DataGridView.Services;
+using DataGridView.Services.Contracts;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<IStorage, DbRepository>();
+builder.Services.AddScoped<IApplicantService, ApplicantService>();
 
 var app = builder.Build();
 

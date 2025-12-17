@@ -48,6 +48,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataGridView.Context", "DAL\DataGridView.Context\DataGridView.Context.csproj", "{334031CD-5357-43D8-A026-8909B8A58205}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataGridView.Web", "DataGridView.Web\DataGridView.Web.csproj", "{02B82A65-A25F-445E-941B-5339065C5187}"
+	ProjectSection(ProjectDependencies) = postProject
+		{351C5B3C-CB7C-A7A5-386E-5FA2FBF1DC12} = {351C5B3C-CB7C-A7A5-386E-5FA2FBF1DC12}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
